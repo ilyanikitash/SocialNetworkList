@@ -28,6 +28,7 @@ final class MSTableViewCell: UITableViewCell {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .bold)
         label.textColor = .customBlack
+        label.numberOfLines = 1
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -36,6 +37,7 @@ final class MSTableViewCell: UITableViewCell {
         let label = UILabel()
         label.font = .systemFont(ofSize: 13)
         label.textColor = .customBlack
+        label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -74,9 +76,11 @@ final class MSTableViewCell: UITableViewCell {
             likeButton.widthAnchor.constraint(equalToConstant: 24),
             
             postName.leadingAnchor.constraint(equalTo: profileAvatar.trailingAnchor, constant: 8),
+            postName.trailingAnchor.constraint(equalTo: likeButton.leadingAnchor, constant: -8),
             postName.centerYAnchor.constraint(equalTo: profileAvatar.centerYAnchor),
             
             postText.leadingAnchor.constraint(equalTo: postName.leadingAnchor),
+            postText.trailingAnchor.constraint(equalTo: cellView.trailingAnchor, constant: -8),
             postText.topAnchor.constraint(equalTo: postName.bottomAnchor, constant: 20)
         ])
     }
@@ -86,10 +90,8 @@ final class MSTableViewCell: UITableViewCell {
     }
     
     func configure(with post: PostModel) {
-//        self.profileAvatar = post.profileAvatar
-//        self.postName = post.postName
-//        self.postText = post.postText
-        profileAvatar.image = post.profileAvatar
+//        profileAvatar.image = post.profileAvatar
+        profileAvatar.image = UIImage(named: "mockAvatar1")
         postName.text = post.postName
         postText.text = post.postText
     }
