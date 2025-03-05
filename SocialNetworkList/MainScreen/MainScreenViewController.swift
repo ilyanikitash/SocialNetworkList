@@ -16,17 +16,29 @@ class MainScreenViewController: UIViewController {
         return tableView
     }()
     
-    private var posts: [PostModel] = [
-        PostModel(id: "", profileAvatar: UIImage(named: "mockAvatar1") ?? UIImage(), postName: "New post", postText: "My first post here", isLiked: false),
-        PostModel(id: "", profileAvatar: UIImage(named: "mockAvatar2") ?? UIImage(), postName: "Second post", postText: "My second post here", isLiked: false),
-        PostModel(id: "", profileAvatar: UIImage(named: "mockAvatar3") ?? UIImage(), postName: "Another post", postText: "Something", isLiked: false)
-    ]
+    var posts: [PostModel] = []
+    private var postLoaderObserver: NSObjectProtocol?
+    private let postLoader = PostLoader.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupObserver()
         setupUserInterface()
         setupNavigationBar()
         setupTableView()
+        postLoader.fetchPosts()
+    }
+    
+    private func setupObserver() {
+        postLoaderObserver = NotificationCenter.default
+            .addObserver(forName: PostLoader.didChangeNotification,
+                         object: nil,
+                         queue: .main
+            ) { [weak self] _ in
+                guard let self else { return }
+                self.posts = postLoader.posts
+                self.tableView.reloadData()
+            }
     }
     
     private func setupUserInterface() {
