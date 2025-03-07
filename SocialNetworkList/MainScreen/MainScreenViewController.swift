@@ -17,6 +17,7 @@ class MainScreenViewController: UIViewController {
     }()
     
     var posts: [PostModel] = []
+    private var refreshControl = UIRefreshControl()
     private var avatarLoaderObserver: NSObjectProtocol?
     private var postLoaderObserver: NSObjectProtocol?
     private let postLoader = PostLoader.shared
@@ -29,6 +30,15 @@ class MainScreenViewController: UIViewController {
         setupNavigationBar()
         setupTableView()
         postLoader.fetchPosts()
+    }
+    
+    @objc private func refreshData() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            // Обновление таблицы
+            self.tableView.reloadData()
+            // Остановка анимации
+            self.refreshControl.endRefreshing()
+        }
     }
     
     private func setupAvatarObserver() {
@@ -77,6 +87,8 @@ class MainScreenViewController: UIViewController {
     }
     
     private func setupTableView() {
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        tableView.refreshControl = refreshControl
         tableView.separatorStyle = .none
         tableView.dataSource = self
         tableView.delegate = self
