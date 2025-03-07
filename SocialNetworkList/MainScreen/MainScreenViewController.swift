@@ -17,19 +17,28 @@ class MainScreenViewController: UIViewController {
     }()
     
     var posts: [PostModel] = []
+    private var avatarLoaderObserver: NSObjectProtocol?
     private var postLoaderObserver: NSObjectProtocol?
     private let postLoader = PostLoader.shared
+    private let avatarLoader = AvatarLoader.shared
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupObserver()
+        setupPostObserver()
         setupUserInterface()
         setupNavigationBar()
         setupTableView()
         postLoader.fetchPosts()
     }
     
-    private func setupObserver() {
+    private func setupAvatarObserver() {
+        avatarLoaderObserver = NotificationCenter.default.addObserver(forName: AvatarLoader.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
+            guard let self else { return }
+            self.tableView.reloadData()
+        }
+    }
+    
+    private func setupPostObserver() {
         postLoaderObserver = NotificationCenter.default
             .addObserver(forName: PostLoader.didChangeNotification,
                          object: nil,
