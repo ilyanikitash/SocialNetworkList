@@ -17,7 +17,7 @@ final class MSTableViewCell: UITableViewCell {
     
     private lazy var profileAvatar: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "mockAvatar1")
+        imageView.image = UIImage(named: "StubImage")
         imageView.layer.cornerRadius = 25
         imageView.clipsToBounds = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -48,7 +48,13 @@ final class MSTableViewCell: UITableViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    
+    private var url: URL {
+        guard let url = URL(string: "https://picsum.photos/200") else { // ресурс работет только с ВПН
+            preconditionFailure("Unable to convert string to url")
+        }
+        return url
+    }
+    private let avatarLoader = AvatarLoader.shared
     static let identifier = "MSTableViewCell"
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -90,8 +96,13 @@ final class MSTableViewCell: UITableViewCell {
     }
     
     func configure(with post: PostModel) {
-//        profileAvatar.image = post.profileAvatar
-        profileAvatar.image = UIImage(named: "mockAvatar1")
+        avatarLoader.loadAvatar(url: url) { [weak self] image in
+            guard let image = image else { return }
+            guard let self else { return }
+            DispatchQueue.main.async {
+                self.profileAvatar.image = image
+            }
+        }
         postName.text = post.postName
         postText.text = post.postText
     }
