@@ -7,7 +7,7 @@
 import UIKit
 
 struct PostModel {
-    let id: Int
+    let id: Int?
     let profileAvatar: UIImage?
     let postName: String
     let postText: String
@@ -19,6 +19,22 @@ struct PostModel {
         self.postName = postName
         self.postText = postText
         self.isLiked = isLiked
+    }
+    
+    init?(from post: Post) {
+        guard
+            let profileAvatar = post.profileAvatar,
+            let postName = post.postName,
+            let postText = post.postText
+        else {
+            return nil
+        }
+        
+        self.id = Int(post.id)
+        self.postName = postName
+        self.postText = postText
+        self.profileAvatar = UIImage(data: profileAvatar)
+        self.isLiked = post.isLiked
     }
     
     init(result post: PostResult) {
