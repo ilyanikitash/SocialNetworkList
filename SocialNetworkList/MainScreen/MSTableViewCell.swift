@@ -96,6 +96,7 @@ final class MSTableViewCell: UITableViewCell {
     }
     
     func configure(with post: PostModel) {
+        print("config \(post.id)")
         avatarLoader.loadAvatar(url: url) { [weak self] image in
             guard let image = image else { return }
             guard let self else { return }

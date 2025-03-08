@@ -41,13 +41,6 @@ class MainScreenViewController: UIViewController {
         }
     }
     
-    private func setupAvatarObserver() {
-        avatarLoaderObserver = NotificationCenter.default.addObserver(forName: AvatarLoader.didChangeNotification, object: nil, queue: .main) { [weak self] _ in
-            guard let self else { return }
-            self.tableView.reloadData()
-        }
-    }
-    
     private func setupPostObserver() {
         postLoaderObserver = NotificationCenter.default
             .addObserver(forName: PostLoader.didChangeNotification,
