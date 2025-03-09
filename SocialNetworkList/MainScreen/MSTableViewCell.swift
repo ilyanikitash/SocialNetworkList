@@ -44,6 +44,7 @@ final class MSTableViewCell: UITableViewCell {
     
     private lazy var likeButton: UIButton = {
         let button = UIButton()
+        button.addTarget(self, action: #selector(didTapLikeButton), for: .touchUpInside)
         button.setImage(UIImage(named: "ActiveLike"), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -54,6 +55,13 @@ final class MSTableViewCell: UITableViewCell {
         }
         return url
     }
+    private var id = UUID()
+    private var name: String = ""
+    private var text: String = ""
+    private var profileImage: UIImage = UIImage()
+    private var isLiked: Bool = false
+    
+    private let postStore = PostStore()
     private let avatarLoader = AvatarLoader.shared
     static let identifier = "MSTableViewCell"
     
@@ -78,8 +86,8 @@ final class MSTableViewCell: UITableViewCell {
             
             likeButton.centerYAnchor.constraint(equalTo: profileAvatar.centerYAnchor),
             likeButton.trailingAnchor.constraint(equalTo: cellView.trailingAnchor, constant: -10),
-            likeButton.heightAnchor.constraint(equalToConstant: 24),
-            likeButton.widthAnchor.constraint(equalToConstant: 24),
+            likeButton.heightAnchor.constraint(equalToConstant: 40),
+            likeButton.widthAnchor.constraint(equalToConstant: 40),
             
             postName.leadingAnchor.constraint(equalTo: profileAvatar.trailingAnchor, constant: 8),
             postName.trailingAnchor.constraint(equalTo: likeButton.leadingAnchor, constant: -8),
@@ -95,16 +103,36 @@ final class MSTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    @objc private func didTapLikeButton() {
+        let post = PostModel(id: id,
+                             profileAvatar: profileImage,
+                             postName: name,
+                             postText: text,
+                             isLiked: isLiked)
+        postStore.addNew(post: post)
+    }
+    
     func configure(with post: PostModel) {
-        print("config \(post.id)")
         avatarLoader.loadAvatar(url: url) { [weak self] image in
             guard let image = image else { return }
             guard let self else { return }
             DispatchQueue.main.async {
                 self.profileAvatar.image = image
+                self.profileImage = image
             }
         }
         postName.text = post.postName
         postText.text = post.postText
+        self.id = post.id
+        name = post.postName
+        text = post.postText
+        isLiked = post.isLiked
+    }
+    
+    func configureSavedPost(with post: PostModel) {
+        profileAvatar.image = post.profileAvatar ?? UIImage(named: "StubImage")
+        postName.text = post.postName
+        postText.text = post.postText
+        likeButton.isHidden = true
     }
 }
