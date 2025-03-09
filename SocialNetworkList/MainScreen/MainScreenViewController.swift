@@ -8,39 +8,25 @@
 import UIKit
 
 class MainScreenViewController: UIViewController {
-    
-    private lazy var tableView: UITableView = {
-        let tableView = UITableView()
-        tableView.backgroundColor = .customWhite
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        return tableView
-    }()
-    
     var posts: [PostModel] = []
-    private var refreshControl = UIRefreshControl()
     private var avatarLoaderObserver: NSObjectProtocol?
     private var postLoaderObserver: NSObjectProtocol?
     private let postLoader = PostLoader.shared
     private let avatarLoader = AvatarLoader.shared
-    
+    private let mainScreenView = MainScreenView()
+    //MARK: - Lifecycle
+    override func loadView() {
+        self.view = mainScreenView
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
+        mainScreenView.configure()
         setupPostObserver()
-        setupUserInterface()
         setupNavigationBar()
         setupTableView()
         postLoader.fetchPosts()
     }
-    
-    @objc private func refreshData() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            // Обновление таблицы
-            self.tableView.reloadData()
-            // Остановка анимации
-            self.refreshControl.endRefreshing()
-        }
-    }
-    
+    //MARK: - Setup
     private func setupPostObserver() {
         postLoaderObserver = NotificationCenter.default
             .addObserver(forName: PostLoader.didChangeNotification,
@@ -49,24 +35,8 @@ class MainScreenViewController: UIViewController {
             ) { [weak self] _ in
                 guard let self else { return }
                 self.posts = postLoader.posts
-                self.tableView.reloadData()
+                mainScreenView.tableView.reloadData()
             }
-    }
-    
-    private func setupUserInterface() {
-        view.backgroundColor = .customWhite
-        
-        view.addSubview(tableView)
-        setupConstraints()
-    }
-    
-    private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
     }
     
     private func setupNavigationBar() {
@@ -80,15 +50,11 @@ class MainScreenViewController: UIViewController {
     }
     
     private func setupTableView() {
-        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-        tableView.refreshControl = refreshControl
-        tableView.separatorStyle = .none
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.register(MSTableViewCell.self, forCellReuseIdentifier: MSTableViewCell.identifier)
+        mainScreenView.tableView.dataSource = self
+        mainScreenView.tableView.delegate = self
     }
 }
-
+//MARK: - UITableViewDataSource
 extension MainScreenViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         posts.count
@@ -104,7 +70,7 @@ extension MainScreenViewController: UITableViewDataSource {
         return cell
     }
 }
-
+//MARK: - UITableViewDelegate
 extension MainScreenViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         300
